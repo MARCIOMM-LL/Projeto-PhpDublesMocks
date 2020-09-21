@@ -2,6 +2,11 @@
 
 namespace Alura\Leilao\Model;
 
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DomainException;
+
 class Leilao
 {
     /** @var Lance[] */
@@ -10,31 +15,31 @@ class Leilao
     private $descricao;
     /** @var bool */
     private $finalizado;
-    /** @var \DateTimeInterface  */
+    /** @var DateTimeInterface  */
     private $dataInicio;
     /** @var int */
     private $id;
 
-    public function __construct(string $descricao, \DateTimeImmutable $dataInicio = null, int $id = null)
+    public function __construct(string $descricao, DateTimeImmutable $dataInicio = null, int $id = null)
     {
         $this->descricao = $descricao;
         $this->finalizado = false;
         $this->lances = [];
-        $this->dataInicio = $dataInicio ?? new \DateTimeImmutable();
+        $this->dataInicio = $dataInicio ?? new DateTimeImmutable();
         $this->id = $id;
     }
 
     public function recebeLance(Lance $lance)
     {
         if ($this->finalizado) {
-            throw new \DomainException('Este leilão já está finalizado');
+            throw new DomainException('Este leilão já está finalizado');
         }
 
         $ultimoLance = empty($this->lances)
             ? null
             : $this->lances[count($this->lances) - 1];
-        if (!empty($this->lances) && $ultimoLance->getUsuario() == $lance->getUsuario()) {
-            throw new \DomainException('Usuário já deu o último lance');
+        if (!empty($this->lances) && $ultimoLance->getUsuario() === $lance->getUsuario()) {
+            throw new DomainException('Usuário já deu o último lance');
         }
 
         $this->lances[] = $lance;
@@ -63,14 +68,14 @@ class Leilao
         return $this->finalizado;
     }
 
-    public function recuperarDataInicio(): \DateTimeInterface
+    public function recuperarDataInicio(): DateTimeInterface
     {
         return $this->dataInicio;
     }
 
     public function temMaisDeUmaSemana(): bool
     {
-        $hoje = new \DateTime();
+        $hoje = new DateTime();
         $intervalo = $this->dataInicio->diff($hoje);
 
         return $intervalo->days > 7;
